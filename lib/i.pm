@@ -119,26 +119,70 @@ sub concat {
 
 # -- Ranges
 
-sub range {
-  # range($n) => _range_unbounded($n,1)
-  # range($n, $m) => _range_{pos/neg}($n, $m, +/-1)
-  # range($n, $t, $m) => _range_{pos/neg}($n, $m, $t-$n)
+sub upto {
   if (@_ == 1) {
     return _range_unbounded($_[0], 1);
   } elsif (@_ == 2) {
-    my ($x, $y) = @_;
-    if ($y >= $x) {
-      return _range_pos($x, $y, 1);
-    } else {
-      return _range_neg($x, $y, -1);
-    }
+    return _range_pos($_[0], $_[1], 1);
   } elsif (@_ == 3) {
+    my ($x, $y, $step) = @_;
+    carp "downto: step is not >= 0: ".$step;
+    return _range_neg($x, $y, $step);
+  } else {
+    croak "upto: unexpected number of arguments (".scalar(@_).")";
+  }
+}
+
+sub downto {
+  if (@_ == 1) {
+    return _range_unbounded($_[0], -1);
+  } elsif (@_ == 2) {
+    return _range_neg($_[0], $_[1], -1);
+  } elsif (@_ == 3) {
+    my ($x, $y, $step) = @_;
+    carp "downto: step is not >= 0: ".$step;
+    return _range_neg($x, $y, -$step);
+  } else {
+    croak "downto: unexpected number of arguments (".scalar(@_).")";
+  }
+}
+
+sub fromto {
+  unless (@_ == 2 || @_ == 3) {
+    croak "fromto: unexpected number of arguments (".scalar(@_).")";
+  }
+  my ($x, $y, $step) = @_;
+  unless (defined($step)) {
+    $step = ($x >= $y ? 1 : -1);
+  }
+  if ($step >= 0) {
+    return _range_pos($_[0], $_[1], $step);
+  } else {
+    return _range_neg($_[0], $_[1], $step);
+  }
+}
+
+sub range {
+  # range($n) => _range_unbounded($n,1)
+  # range($n, $m) => _range_{pos/neg}($n, $m, +/-1)
+  # range($n, $m, $step) => _range_{pos/neg}($n, $m, $step)
+  if (@_ == 1) {
+    return _range_unbounded($_[0], 1);
+  } elsif (@_ == 2 || @_ == 3) {
     my ($x, $y, $z) = @_;
-    my $d = $y - $x;
-    if ($d >= 0) {
-      return _range_pos($x, $z, $d);
+    unless (defined($z)) {
+      $z = defined($y) ? ($y >= $x ? 1 : -1)
+                       : 1;
+    }
+    # $x and $z are defined
+    if (defined($y)) {
+      if ($z >= 0) {
+        return _range_pos($x, $y, $z);
+      } else {
+        return _range_neg($x, $y, $z);
+      }
     } else {
-      return _range_neg($x, $z, $d);
+      return _range_unbounded($x, $z);
     }
   } else {
     die "too many arguments to range: ".d(\@_);
