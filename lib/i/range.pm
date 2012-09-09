@@ -7,6 +7,9 @@ use d ();
 use Carp;
 use i::iter;
 
+use Exporter 'import';
+our @EXPORT = qw/upto downto fromto/;
+
 sub upto {
   unless (@_ == 1 || @_ == 2 || @_ == 3) {
     croak "upto: unexpected number of arguments (".scalar(@_).")";
@@ -116,13 +119,6 @@ sub _range_unbounded {
     $from += $step;
     return $r;
   }
-}
-
-BEGIN {
-  no strict 'refs';
-  *{"i::upto"} = \&upto;
-  *{"i::downto"} = \&downto;
-  *{"i::fromto"} = \&fromto;
 }
 
 1;

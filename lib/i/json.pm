@@ -6,11 +6,14 @@ use feature ':5.10';
 use i::curry;
 use i::open;
 
+use Exporter 'import';
+our @EXPORT = qw/json_reader json_writer/;
+
 use JSON;
 
 my $JSON = JSON->new->ascii(1);
 
-sub reader {
+sub json_reader {
   my ($fh) = @_;
   if (ref($fh)) {
     sub {
@@ -27,7 +30,7 @@ sub reader {
   }
 }
 
-sub writer_ :curry2(writer) {
+sub json_writer_ :curry2(json_writer) {
   my ($fh, $i) = @_;
   if (ref($fh)) {
     sub {

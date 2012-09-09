@@ -8,7 +8,15 @@ use Carp;
 use i::curry;
 use i::iter;
 
-sub matches_named_ : curry1(matches_named) {
+use Exporter 'import';
+our @EXPORT = qw/
+  matches_named
+  matches_array
+  match_once_named
+  match_once_array
+/;
+
+sub matches_named_ : curry2(matches_named) {
   my ($re, $i) = @_;
   my $line;
   iter {
@@ -66,4 +74,3 @@ sub match_once_array_ : curry2(match_once_array) {
 }
 
 1;
-

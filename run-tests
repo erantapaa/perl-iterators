@@ -4,5 +4,14 @@ use FindBin qw/$Bin/;
 use lib "$Bin/lib";
 use Test::Harness;
 
-runtests("t/01-range.t");
+sub main {
+  @ARGV = alltests() unless @ARGV;
+  runtests(@ARGV);
+}
+
+main();
+
+sub alltests {
+  glob("t/*.t");
+}
 

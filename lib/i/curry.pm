@@ -2,6 +2,7 @@ package i::curry;
 
 use strict;
 use warnings;
+use Carp;
 
 use Exporter 'import';
 our @EXPORT = qw/MODIFY_CODE_ATTRIBUTES/;
@@ -49,7 +50,7 @@ sub curry1 {
     if (@_ == 0) { sub { goto &$code } }
     elsif (@_ == 1) { goto &$code }
     else {
-      die "$fullname: expecting 0 or 1 arguments, found ".scalar(@_);
+      croak "$fullname: expecting 0 or 1 arguments, found ".scalar(@_);
     }
   };
 }
@@ -68,7 +69,7 @@ sub curry2code {
         goto &$code;
       }
     } else {
-      die "$fullname: expecting 1 or 2 arguments, found ".scalar(@_);
+      croak "$fullname: expecting 1 or 2 arguments, found ".scalar(@_);
     }
   };
 }
@@ -87,7 +88,7 @@ sub curry2 {
         goto &$code;
       }
     } else {
-      die "$fullname: expecting 1 or 2 arguments, found ".scalar(@_);
+      croak "$fullname: expecting 1 or 2 arguments, found ".scalar(@_);
     }
   };
 }

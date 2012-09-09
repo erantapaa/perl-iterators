@@ -2,7 +2,7 @@ package i::dirent;
 
 use strict;
 use warnings;
-use File::stat;
+use File::stat ();
 
 sub leaf {
   shift->{leaf};

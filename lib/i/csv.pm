@@ -5,9 +5,12 @@ use warnings;
 use i::curry;
 use i::open;
 
+use Exporter 'import';
+our @EXPORT = qw/csv_reader csv_writer/;
+
 use Text::CSV;
 
-sub reader {
+sub csv_reader {
   my ($fh) = @_;
   if (ref($fh)) {
     return _reader($fh);
@@ -42,7 +45,7 @@ sub _reader {
   }
 }
 
-sub writer_ :curry2(writer) {
+sub csv_writer_ :curry2(csv_writer) {
   my ($fh, $i) = @_;
   my $csv = Text::CSV->new({ binary => 1 });
   sub {
