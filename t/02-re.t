@@ -44,5 +44,13 @@ t('matches_named',
               ],
 );
 
+t('match_once_named',
+  re => qr/(?<w1>\w+)\s+(?<w2>\w+)/,
+  source => ['this is a good test', 'of the emergency broadcast system'],
+  expected => [ {w1 => 'this', w2 => 'is' },
+                {w1 => 'of', w2 => 'the' },
+              ],
+);
+
 done_testing();
 

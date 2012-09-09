@@ -2,6 +2,7 @@
 
 use FindBin qw/$Bin/;
 use lib "$Bin/lib";
+use Cwd qw/abs_path getcwd/;
 use Test::Harness;
 
 sub main {
@@ -12,6 +13,11 @@ sub main {
 main();
 
 sub alltests {
-  glob("t/*.t");
+  # if $Bin == 
+  my $dir = "";
+  if (abs_path($Bin) ne abs_path(getcwd())) {
+    $dir = "$Bin/";
+  }
+  glob($dir."t/*.t");
 }
 
