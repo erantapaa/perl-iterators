@@ -36,7 +36,7 @@ sub at {
 
 sub stream_is {
   my $i = shift;
-  my $expected = shift;
+  my $expect = shift;
   my %args = @_;
   my $name = delete $args{name};
   my $initial = delete $args{initial};
@@ -44,11 +44,11 @@ sub stream_is {
 
   $name = at(1+$level) unless defined($name);
 
-  my $n = scalar(@$expected);
+  my $n = scalar(@$expect);
   unless ($initial) {
     $n++;
   }
-  Test::More::is_deeply( _take($n, $i), $expected, $name);
+  Test::More::is_deeply( _take($n, $i), $expect, $name);
 }
 
 sub test_c2 {
@@ -60,24 +60,24 @@ sub test_c2 {
   my $source = $c2->source;
   my $arg = $c2->arg;
   my $code = $c2->code;
-  my $expected = $c2->expected;
+  my $expect = $c2->expect;
 
   {
     my $s = i::array($source);
     my $i = $code->($arg);
-    stream_is( $i->($s), $expected, level => $level+1,  name => "$name (curried)");
+    stream_is( $i->($s), $expect, level => $level+1,  name => "$name (curried)");
   }
 
   {
     my $s = i::array($source);
     my $i = $code->($arg, $s);
-    stream_is( $i, $expected, level => $level+1,  name => "$name (non-curried)");
+    stream_is( $i, $expect, level => $level+1,  name => "$name (non-curried)");
   }
 
   {
     my $s = i::array($source);
     my $i = i::compose($s, $code->($arg));
-    stream_is( $i, $expected, level => $level+1, name => "$name (compose)");
+    stream_is( $i, $expect, level => $level+1, name => "$name (compose)");
   }
 }
 
@@ -86,7 +86,7 @@ sub c2 {
   my $code     = $args->required('code', \&check_code_or_name);
   my $arg      = $args->required('arg');
   my $source   = $args->required('source', \&check_array);
-  my $expected = $args->required('expected', \&check_array);
+  my $expect   = $args->required('expect', \&check_array);
   my $name     = $args->optional('name');
   my $level    = $args->optional('level', 1);
 
@@ -105,7 +105,7 @@ sub c2 {
     croak "c2: first argument is not a CODE ref";
   }
 
-  i::test::c2->new($code, $arg, $source, $expected);
+  i::test::c2->new($code, $arg, $source, $expect);
 }
 
 1;
