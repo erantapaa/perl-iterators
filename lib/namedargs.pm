@@ -86,6 +86,37 @@ namedargs - library for processing named argments
   foo(req1 => 3, req2 => 4, other => 5)
                          # unrecognized parameter(s): other
 
+=head1 METHODS
+
+B<new( $ARGS )>
+
+Create a new B<namedargs> object with the argument array B<$ARGS>.
+
+B<required($name, @checks )>
+
+Lookup the value of the named argument B<$name> and throw
+an exception if the argument is not present. Otherwise
+return its value after performing the specified checks.
+
+B<optional($name, $default, @checks)>
+
+Lookup the value of the named argument B<$name>.
+If the argument is not present, return B<$default>.
+Otherwise perform the specified checks before returning the value of the argument.
+
+B<noleftovers>
+
+Throw an exception if there were named arguments which were not retrieved
+using either B<required> or B<optional>.
+
+=head1 CHECK FUNCTIONS
+
+The B<requried> and B<optional> methods can take a list of B<check functions>.
+These are functions which are allowed to inspect (and possibly modify) the
+returned argument value before it is returned to the caller.
+
+The module B<namedargs::checks> contain some commonly used check functions.
+
 =cut
 
 1;
