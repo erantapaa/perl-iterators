@@ -53,4 +53,45 @@ sub json_writer_ :curry2(json_writer) {
   }
 }
 
+=pod
+
+=head1 NAME
+
+i::json - iterators for reading and wring line-oriented JSON
+
+=head1 DESCRIPTION
+
+=head1 SYNOPSIS
+
+  use i::json;
+
+  i::compose(
+    json_reader(\*STDIN)
+    => i::map { $_->{count} += 1 }
+    => json_writer(\*STDOUT)
+    => i::run()
+  );
+
+=head1 EXPORTED FUNCTIONS
+
+B<json_reader( $fh )>
+
+Construct a line-oriented JSON reader which reads from the file handle B<$fh>.
+This iterator yields HASH refs.
+
+B<json_writer( $fh, $i )>
+
+B<json_writer( $fh )>
+
+B<json_writer( )>
+
+Construct a line-oriented JSON writer which accepts HASH refs from the
+iterator source B<$i> and writes them to the file handle B<$fh>.
+This iterator is a pass-through iterator. B<json_writer> is an auto-curried
+function which may be called with 0, 1 or 2 arguments.
+
+=cut
+
+
+
 1;

@@ -3,16 +3,14 @@ package i::lines;
 use strict;
 use warnings;
 use feature ":5.10";
-use Carp;
 use i::iter;
-use i::curry;
 
 use Exporter 'import';
-our @EXPORT = qw/lines chomped_lines/;
+our @EXPORT = qw/lines chomped_lines diamond chomped_diamond/;
 
 # -- Lines from files
 
-sub lines ($) {
+sub lines {
   my $fh = shift;
   iter {
     readline($fh);
@@ -22,10 +20,7 @@ sub lines ($) {
 sub chomped_lines {
   my $fh = shift;
   iter {
-    if (defined(my $x = readline($fh))) {
-      chomp $x;
-      return $x;
-    }
+    while (<$fh>) { chomp; return $_ }
     return;
   }
 }
@@ -43,5 +38,38 @@ sub chomped_diamond {
     return;
   }
 }
+
+=pod
+
+=head1 NAME
+
+i::lines - iterators which return lines from files
+
+=head1 SYNOPSIS
+
+  lines(\*STDIN)
+  chomped_lines(\*STDIN)
+  diamond()
+  chomped_diamond()
+
+=head1 EXPORTED FUNCTIONS
+
+B<lines( $fh )>
+
+Creates an iterator which returns lines from a file handle using B<readline()>.
+
+B<chomped_lines( $fh )>
+
+Same as B<lines()> but the lines are chomped first before being returned.
+
+B<diamond()>
+
+Return lines from the diamond B(E<lt>E<gt>) operator.
+
+B<chomped_diamond()>
+
+Same as B<diamond()> but the lines are chomped first.
+
+=cut
 
 1;

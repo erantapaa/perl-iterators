@@ -121,5 +121,30 @@ sub _range_unbounded {
   }
 }
 
+=pod
+
+=head1 NAME
+
+i::range - iterate over a sequence of numbers
+
+=head1 SYNOPSIS
+
+  upto(3, 6)               # 3, 4, 5, 6
+  upto(3)                  # 3, 4, 5, ...
+  upto(3, 6, 2)            # 3, 5
+  upto(3, undef, 2)        # 3, 5, 7, 9, ...
+
+  downto(5, 1)             # 5, 4, 3, 2, 1
+  downto(5)                # 5, 4, 3, 2, 1, 0, -1, ...
+  downto(5, 1, 2)          # 5, 3, 1
+  downto(5, undef, 2)      # 5, 3, 1, -1, ...
+
+  fromto(1, 4)             # 1, 2, 3, 4
+  fromto(4, 1)             # 4, 3, 2, 1
+  fromto(1, 6, 2.5)        # 1, 2.5, 5
+  fromto(1, undef, 2.5)    # 1, 2.5, 5, 7.5, 10, ...
+
+=cut
+
 1;
 
