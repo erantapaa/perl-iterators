@@ -7,6 +7,7 @@ use d ();
 use Carp;
 use i::curry;
 use i::iter;
+use Scalar::Util qw/reftype/;
 
 our @submodules = qw/range re directory argv lines json csv dbi/;
 
@@ -26,18 +27,33 @@ sub import {
 
 sub compose {
   die "compose requires at least one argument" unless @_;
-  my $i = shift;
-  for (@_) { $i = $_->($i) }
-  return $i;
+  my @chain;
+  for (@_) {
+    if (reftype($_) eq "ARRAY") {
+      push(@chain, @$_);
+    } else {
+      push(@chain, $_);
+    }
+  }
+  return \@chain;
+}
+
+sub run {
+  my $chain = compose(@_);
+  croak "run: empty iterator pipeline" unless @$chain;
+  croak "run: single element pipeline" unless @$chain > 1;
+
+  my $i = shift(@$chain);
+  my $last = pop(@$chain);
+  
+  while (@$chain) {
+    $i = shift(@$chain)->($i);
+  }
+
+  $last->($i);
 }
 
 # Sinks
-
-sub run_ : curry1(run) {
-  my $i = shift;
-  while (defined($i->())) { }
-  return;
-}
 
 sub trace_ : curry1(trace) {
   my $i = shift;
@@ -110,7 +126,7 @@ sub tap_ (&$) : curry2code(tap) {
 sub take_ : curry2(take) {
   my ($n, $i) = @_;
   iter {
-    return unless $n-- > 0;
+    return if $n-- <= 0;
     my $x = $i->();
     return $x if defined($x);
     $n = 0;
@@ -178,99 +194,37 @@ i - an iterator library
 
 =head1 DESCRIPTION
 
-This module implements 'pull'-style iterators. An pull-iterator is simply a CODE ref
-which will return the next value in a stream of values every time it is called.
-When the iterator has no more values to yield it returns B<undef>.
+This module implements 'pull'-style iterators. For more background information
+on iterators, please see the pod documentation in the B<i::intro> module.
 
-=head1 ITERATOR TYPES
+=head1 SYNOPSIS
 
-There are three kinds of iterators:
+  use i;
+  
+  $i = i::compose( $i1 => $i2 => ... => $in );
 
-=over 4
+  # Sinks
 
-=item SOURCES
+  i::run($i);
+  i::run( $i1 => $i2 => ... $in );
 
-=item TRANSFORMERS
+  my $list = i::collect($i);
+  my $list = i::take($n, $i);
+  i::do { ... } $i;
 
-=item SINKS
+  # Transformers
 
-=back
+  i::filter { ... } $i;
+  i::map { ... } $i;
+  i::tap { ... } $i;
+  i::concat( @list );
 
-SOURCES appear at the beginning of an iterator chain and produce values without requiring
-input from another iterator.
+  # Sources
 
-TRANSFORMERS take an iterator as input to create a new iterator.
-TRANSFORMERS appear in the middle of an iterator chain.
-
-Like TRANSFORMERS, SINKS take an iterator as input, but do not create a new iterator.
-SINKS may only appear at the end of an iterator chain.
-
-Examples of each kind of iterator:
-
-  my $source = sub { state $n = 4; $n ? $n-- : undef }
-
-  my $sink = sub { my $i = shift;
-                   while (defined(my $x = $i->())) {
-                     print $x, " ";
-                   }
-                   print "\n";
-                 }
-
-  my $filter = sub { my $i = shift;
-                     sub {
-                       while (defined(my $x = $i->())) {
-                         next unless $x % 2 == 0;
-                         return 10*$x;
-                       }
-                      }
-                    }
-
-The iterator B<$source> will yield the values 4, 3, 2 and 1 before returning B<undef>
-which is the signal that the stream has been exhausted.
-
-The transformer B<$filter> reads from an input iterator, filters out those values
-which are even and otherwise returns a function (in this case 10*$x) of the input stream value.
-
-The sink B<$sink> reads from an input iterator and prints out each value from that stream.
-
-Strictly speaking TRANSFORMERS and SINKS are not iterators themselves but functions of
-iterators. Hopefully this won't be too confusing.
-
-=head1 COMPOSING ITERATORS
-
-SOURCES, TRANSFORMERS and SINKS may be composed together to form new iterators
-using the function B<i::compose>.
-
-Examples:
-
-    i::compose( $source => $sink )
-      -- prints: 4 3 2 1
-
-    i::compose( $source => $filter => $sink )
-      -- prints: 40 20
-
-    i::compose( $source => $filter => $filter => $sink )
-      -- prints: 400 200
-
-It's up to the user to make sure that the composition makes sense.
-In general a chain of iterators may be composed if each pair of iterators in the chain
-is either:
-
-=over 4
-
-=item
-a SOURCE feeding into a TRANSFORMER
-
-=item
-a SOURCE feeding into a SINK
-
-=item
-a TRANSFORMER feeding into another TRANSFORMER
-
-=item
-a TRANSFORMER feeding into a SINK
-
-=back
+  i::array(\@list);
+  i::array_pairs(\@list);
+  i::hash_pairs(\%hash);
+  i::ARGV()
 
 =cut
 

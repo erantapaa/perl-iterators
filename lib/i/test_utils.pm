@@ -8,7 +8,7 @@ use namedargs;
 use namedargs::checks qw/check_array check_code_or_name/;
 
 use Exporter 'import';
-our @EXPORT = qw/stream_is initial_stream_is c2 test_c2/;
+our @EXPORT = qw/stream_is initial_stream_is c2 test_c2 at/;
 
 # Define our own basic collect function.
 
@@ -30,7 +30,7 @@ sub _take {
 
 sub at {
   my ($depth) = @_;
-  my @c = caller($depth);
+  my @c = caller($depth || 0);
   ("at ".$c[1]." line ".$c[2]);
 }
 
