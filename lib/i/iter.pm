@@ -71,6 +71,12 @@ use overload "|" => \&i::iter::pipe;
 
 sub iter_type { i::iter::SOURCE }
 
+sub run {
+  my $i = shift;
+  # This is the same as draining the source
+  while (defined(my $x = $i->())) { }
+}
+
 package i::iter::sink;
 
 use overload "|" => \&i::iter::pipe;

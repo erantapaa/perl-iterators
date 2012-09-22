@@ -23,8 +23,19 @@ sub import {
   }
 }
 
-sub run {
+# Composing and Running iterators
+
+sub compose {
+  croak "compose requires at least one argument" unless @_;
   my $i = shift;
+  while (@_) {
+    $i = $i | shift;
+  }
+  return $i;
+}
+
+sub run {
+  my $i = compose(@_);
   # assert $i is a sink
   unless ($i->can('run')) {
     my $label  = $i->can('iter_class') ? $i->iter_class : blessed($i);
@@ -33,9 +44,44 @@ sub run {
   $i->run;
 }
 
-# Composition
-
 # Sinks
+
+sub collect {
+  transsink {
+    my $i = shift;
+    sink {
+      my @a;
+      while (defined(my $x = $i->())) {
+        push(@a, $x);
+      }
+      return \@a;
+    }
+  }
+}
+
+sub do (&) {
+  my $f = shift;
+  transsink {
+    my $i = shift;
+    sink {
+      while (defined(my $x = $i->())) {
+        { local $_ = $x; $f->($x) };
+      }   
+    }
+  };
+}
+
+sub drain {
+  # this is the same as do {}, but just a little more efficient 
+  transsink {
+    my $i = shift;
+    sink {
+      while (defined(my $x = $i->())) { }
+    }
+  }
+}
+
+# Transformers
 
 sub trace {
   transformer {
@@ -49,31 +95,6 @@ sub trace {
     }
   }
 }
-
-sub collect {
-  transsink {
-    my ($i) = @_;
-    sink {
-      my @a;
-      while (defined(my $x = $i->())) {
-        push(@a, $x);
-      }
-      return \@a;
-    }
-  }
-}
-
-sub do (&) {
-  my $f = shift;
-  sink {
-    my $i = shift;
-    while (defined(my $x = $i->())) {
-      { local $_ = $x; $f->($x) };
-    }
-  };
-}
-
-# Transformers
 
 sub filter (&) {
   my $f = shift;
@@ -199,7 +220,8 @@ on iterators, please see the pod documentation in the B<i::intro> module.
 
   use i;
   
-  $i = i::compose( $i1 => $i2 => ... => $in );
+  $i = $i1 | $i2 | ... | $in;
+  $i = i::compose( $i1 => $i2 => ... => $in);
 
   # Sinks
 
@@ -207,7 +229,7 @@ on iterators, please see the pod documentation in the B<i::intro> module.
   i::run( $i1 => $i2 => ... $in );
 
   my $list = i::collect($i);
-  my $list = i::take($n, $i);
+  my $list = i::take($n)->($i);
   i::do { ... } $i;
 
   # Transformers
