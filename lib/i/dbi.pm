@@ -9,14 +9,14 @@ our @EXPORT = qw/sth_arrayref sth_hashref/;
 
 sub sth_arrayref {
   my ($sth) = @_;
-  iter {
+  source {
     $sth->fetchrow_arrayref;
   }
 }
 
 sub sth_hashref {
   my ($sth) = @_;
-  iter {
+  source {
     $sth->fetchrow_hashref;
   }
 }

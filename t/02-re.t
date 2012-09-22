@@ -16,7 +16,7 @@ sub t {
   $rest{level} ++;
 
   my $s = i::array($source);
-  my $i = do { no strict 'refs'; $sub->($re, $s) };
+  my $i = do { no strict 'refs'; $sub->($re)->($s) };
 
   stream_is( $i, $expect, %rest);
 }

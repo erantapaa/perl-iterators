@@ -3,7 +3,7 @@ package i::json;
 use strict;
 use warnings;
 use feature ':5.10';
-use i::curry;
+use i::iter;
 use i::open;
 
 use Exporter 'import';
@@ -16,12 +16,12 @@ my $JSON = JSON->new->ascii(1);
 sub json_reader {
   my ($fh) = @_;
   if (ref($fh)) {
-    sub {
+    source {
       while (<$fh>) { return $JSON->decode($_) }
       return;
     }
   } else {
-    sub {
+    source {
       state $h = i::open::openread($fh);
       return unless $h;
       while (<$h>) { return $JSON->decode($_) }
@@ -30,27 +30,29 @@ sub json_reader {
   }
 }
 
-sub json_writer_ :curry2(json_writer) {
-  my ($fh, $i) = @_;
-  if (ref($fh)) {
-    sub {
-      my $x = $i->();
-      if (defined($x)) {
-        print {$fh} $JSON->encode($x), "\n";
+sub json_writer {
+  my $fh = shift
+  transformer {
+    my $i = shift;
+    if (ref($fh)) {
+      source {
+        my $x = $i->();
+        if (defined($x)) {
+          print {$fh} $JSON->encode($x), "\n";
+        }
+        return $x;
       }
-      return $x;
-    }
-  } else {
-    sub {
-      state $h = i::openwrite($fh);
-      return unless $h;
-      my $x = $h->();
-      if (defined($x)) {
-        print {$fh} $JSON->encode($x), "\n";
+    } else {
+      source {
+        state $h = i::openwrite($fh);
+        return unless $h;
+        my $x = $h->();
+        if (defined($x)) {
+          print {$fh} $JSON->encode($x), "\n";
+        }
+        return $x;
       }
-      return $x;
     }
-  }
 }
 
 =pod

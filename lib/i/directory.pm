@@ -3,7 +3,6 @@ package i::directory;
 use strict;
 use warnings;
 use feature ":5.10";
-use i::curry;
 use i::iter;
 
 use Exporter 'import';
@@ -14,7 +13,7 @@ our @EXPORT = qw/dirents files directories/;
 sub dirents {
   my ($dirname) = @_;
 
-  iter {
+  source {
     state $dh = do { my $h; opendir($h, $dirname) ? $h : undef };
     return unless $dh;
     my $leaf = readdir($dh);
@@ -23,16 +22,20 @@ sub dirents {
   }
 }
 
-sub files_ : curry1(files) {
-  my $i = shift;
-  my $s = ref($i) ? $i : dirents($i);
-  filter { $_->isfile }, $s;
+sub files {
+  transformer {
+    my $i = shift;
+    my $s = ref($i) ? $i : dirents($i);
+    filter { $_->isfile }, $s;
+  }
 }
 
-sub directories_ : curry1(directories) {
-  my $i = shift;
-  my $s = ref($i) ? $i : dirents($i);
-  filter { $_->isdir }, $s;
+sub directories {
+  transformer {
+    my $i = shift;
+    my $s = ref($i) ? $i : dirents($i);
+    filter { $_->isdir }, $s;
+  }
 }
 
 1;

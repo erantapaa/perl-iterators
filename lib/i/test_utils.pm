@@ -70,13 +70,13 @@ sub test_c2 {
 
   {
     my $s = i::array($source);
-    my $i = $code->($arg, $s);
+    my $i = $code->($arg)->($s);
     stream_is( $i, $expect, level => $level+1,  name => "$name (non-curried)");
   }
 
   {
     my $s = i::array($source);
-    my $i = i::compose($s, $code->($arg));
+    my $i = $s | $code->($arg);
     stream_is( $i, $expect, level => $level+1, name => "$name (compose)");
   }
 }

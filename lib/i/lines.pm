@@ -12,28 +12,28 @@ our @EXPORT = qw/lines chomped_lines diamond chomped_diamond/;
 
 sub lines {
   my $fh = shift;
-  iter {
+  source {
     readline($fh);
   }
 }
 
 sub chomped_lines {
   my $fh = shift;
-  iter {
+  source {
     while (<$fh>) { chomp; return $_ }
     return;
   }
 }
 
 sub diamond {
-  iter {
+  source {
     while (<>) { return $_ }
     return;
   }
 }
 
 sub chomped_diamond {
-  iter {
+  source {
     while (<>) { chomp; return $_ }
     return;
   }

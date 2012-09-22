@@ -94,7 +94,7 @@ sub range {
 
 sub _range_pos {
   my ($from, $to, $step) = @_;
-  iter {
+  source {
     return if $from > $to;
     my $r = $from;
     $from += $step;
@@ -104,7 +104,7 @@ sub _range_pos {
 
 sub _range_neg {
   my ($from, $to, $step) = @_;
-  iter {
+  source {
     return if $from < $to;
     my $r = $from;
     $from += $step;
@@ -114,7 +114,7 @@ sub _range_neg {
 
 sub _range_unbounded {
   my ($from, $step) = @_;
-  iter {
+  source {
     my $r = $from;
     $from += $step;
     return $r;

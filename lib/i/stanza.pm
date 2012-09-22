@@ -2,6 +2,7 @@ package i::stanza;
 
 use strict;
 use warnings;
+use i::iter;
 
 use Exporter 'import';
 our @EXPORT_OK = qw/stanzas stanzas_start_matching/;
@@ -12,7 +13,7 @@ sub stanzas {
   my ($start_re, $fh) = @_;
 
   my $buf = "";
-  sub {
+  source {
     return unless defined($buf);
     while (<$fh>) {
       if (m/$start_re/) {
@@ -38,7 +39,7 @@ sub stanzas_start_matching {
 
   my $buf = "";
   my $line = "";
-  sub {
+  source {
     if (defined($line) && $line =~ m/$match_re/) {
       $buf = $line;
       $line = undef;

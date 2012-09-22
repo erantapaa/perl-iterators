@@ -2,7 +2,7 @@ package i::csv;
 
 use strict;
 use warnings;
-use i::curry;
+use i::iter;
 use i::open;
 
 use Exporter 'import';
@@ -15,7 +15,7 @@ sub csv_reader {
   if (ref($fh)) {
     return _reader($fh);
   } else {
-    sub {
+    source {
       state $h = i::open::openread($fh);
       return unless $h;
       state $i = _reader($h);
@@ -27,7 +27,7 @@ sub csv_reader {
 sub _reader {
   my ($fh) = @_;
   my $csv = Text::CSV->new( { binary => 1 } );
-  sub {
+  source {
     state $fields = $csv->getline($fh);
     return unless $fields;
     return if $csv->eof;
@@ -46,14 +46,17 @@ sub _reader {
 }
 
 sub csv_writer_ :curry2(csv_writer) {
-  my ($fh, $i) = @_;
-  my $csv = Text::CSV->new({ binary => 1 });
-  sub {
-    my $r = $i->();
-    if (defined($r)) {
-      $csv->print($fh, $r);
+  my $fh = shift;
+  transformer {
+    my $i = shift;
+    my $csv = Text::CSV->new({ binary => 1 });
+    source {
+      my $r = $i->();
+      if (defined($r)) {
+        $csv->print($fh, $r);
+      }
+      return $r;
     }
-    return $r;
   }
 }
 
