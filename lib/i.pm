@@ -6,7 +6,6 @@ use feature ":5.10";
 use d ();
 use Carp;
 use i::iter;
-use i::chain;
 use Scalar::Util qw/reftype blessed/;
 
 our @submodules = qw/range re directory argv lines json csv dbi/;
@@ -197,6 +196,10 @@ sub hash_pairs {
     }
     return;
   }
+}
+
+sub list {
+  i::array(\@_);
 }
 
 # -- ARGV / <>
